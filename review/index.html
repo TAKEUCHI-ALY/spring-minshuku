@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<div th:replace="~{fragment :: meta}"></div>
+
+	<div th:replace="~{fragment :: styles}"></div>
+
+	<!-- Flatpickr -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+	<title>レビュー</title>
+</head>
+
+<body>
+	<div class="samuraitravel-wrapper">
+		<!-- ヘッダー -->
+		<div th:replace="~{fragment :: header}"></div>
+
+		<main>
+			<div class="container pt-4 pb-5 samuraitravel-container">
+				<div class="row justify-content-center">
+					<div class="col-xxl-9 col-xl-10 col-lg-11">
+						<!-- パンくずリスト -->
+						<nav class="mb-4 d-flex justify-content-start" style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+							<ol class="breadcrumb mb-0">
+								<li class="breadcrumb-item"><a th:href="@{/}">ホーム</a></li>
+								<li class="breadcrumb-item"><a th:href="@{/houses}">民宿一覧</a></li>
+								<li class="breadcrumb-item"><a th:href="@{/houses/__${house.id}__}">民宿詳細</a></li>
+								<li class="breadcrumb-item active" aria-current="page">レビュー一覧</li>
+							</ol>
+						</nav>
+
+						<!-- レビュー一覧 -->
+						<h1 class="mb-4 text-center" th:text="${house.name + ' のすべてのレビュー'}"></h1>
+
+						<div class="row g-4">
+							<!-- 2列表示 -->
+							<div class="col-md-6" th:each="review : ${reviews}">
+								<div class="p-3 border rounded shadow-sm h-100">
+
+									<!-- 氏名 -->
+									<div class="mb-2">
+										<strong th:text="${review.user.name}"></strong>
+									</div>
+
+									<!-- 評価 -->
+									<small class="text-warning">
+										<!-- 埋めた星 -->
+										<span th:each="i : ${#numbers.sequence(1, review.getRating())}">
+											&#9733; <!-- 塗りつぶしの星 -->
+										</span>
+
+										<!-- 空の星 (評価が5の場合は表示しない) -->
+										<span th:if="${review.getRating() < 5}"
+											th:each="i : ${#numbers.sequence(1, 5 - review.getRating())}">
+											&#9734; <!-- 空の星 -->
+										</span>
+									</small>
+
+									<!-- 投稿日 (年月日形式) -->
+									<div class="mb-2">
+										<small class="text-muted" th:if="${review.updatedAt != null}"
+											th:text="${#temporals.format(review.updatedAt, 'yyyy年MM月dd日')}">
+										</small>
+									</div>
+
+									<!-- コメント -->
+									<p class="mb-0" th:utext="${#strings.replace(review.getComment(), '\n', '<br>')}"></p>
+
+								</div>
+							</div>
+						</div>
+
+						<!-- ページネーション -->
+						<nav aria-label="レビューのページネーション" class="mt-4">
+							<ul class="pagination justify-content-center">
+								<!-- 前のページ -->
+								<li class="page-item" th:classappend="${reviews.hasPrevious()} ? '' : 'disabled'">
+									<a class="page-link"
+										th:href="@{${'/houses/' + house.id + '/reviews'}(page=${reviews.number - 1})}">前へ</a>
+								</li>
+
+								<!-- ページ番号 -->
+								<li class="page-item" th:each="i : ${#numbers.sequence(0, reviews.totalPages - 1)}"
+									th:classappend="${i == reviews.number} ? 'active' : ''">
+									<a class="page-link" th:href="@{${'/houses/' + house.id + '/reviews'}(page=${i})}"
+										th:text="${i + 1}"></a>
+								</li>
+
+								<!-- 次のページ -->
+								<li class="page-item" th:classappend="${reviews.hasNext()} ? '' : 'disabled'">
+									<a class="page-link"
+										th:href="@{${'/houses/' + house.id + '/reviews'}(page=${reviews.number + 1})}">次へ</a>
+								</li>
+							</ul>
+						</nav>
+
+						<!-- 戻るボタン -->
+						<div class="text-center mt-4">
+							<a th:href="@{/houses/__${house.id}__}" class="btn btn-secondary">戻る</a>
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</main>
+
+		<!-- フッター -->
+		<div th:replace="~{fragment :: footer}"></div>
+
+	</div>
+
+	<!-- スクリプト -->
+	<div th:replace="~{fragment :: scripts}"></div>
+
+	<!-- Flatpickr -->
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+	<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+	<script th:src="@{/js/flatpickr.js}"></script>
+
+</body>
+</html>
